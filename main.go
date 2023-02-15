@@ -12,6 +12,28 @@ type Pong struct {
 	Result string
 }
 
+type Rarity string
+
+const (
+	RarityN   Rarity = "N"
+	RarityR   Rarity = "R"
+	RaritySR  Rarity = "SR"
+	RaritySSR Rarity = "SSR"
+	RarityUR  Rarity = "UR"
+	RarityLR  Rarity = "LR"
+)
+
+type Item struct {
+	Name   string
+	Rarity Rarity
+}
+
+var card map[string]Item = map[string]Item{
+	"ki":   {Name: "木の剣", Rarity: RarityN},
+	"isi":  {Name: "石の剣", Rarity: RarityR},
+	"tetu": {Name: "鉄の剣", Rarity: RaritySR},
+}
+
 func pinghandle(w http.ResponseWriter, r *http.Request) {
 	pong := Pong{http.StatusOK, "ok"}
 
@@ -25,8 +47,15 @@ func pinghandle(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
+func draw(w http.ResponseWriter, r *http.Request) {
+	for k, v := range card {
+		fmt.Printf("key: %s, value: %v\n", k, v)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", pinghandle)
+	http.HandleFunc("/draw", draw)
 
 	fmt.Println("server start!")
 
