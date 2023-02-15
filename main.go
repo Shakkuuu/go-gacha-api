@@ -48,9 +48,18 @@ func pinghandle(w http.ResponseWriter, r *http.Request) {
 }
 
 func draw(w http.ResponseWriter, r *http.Request) {
+	var cardlist []Item
 	for k, v := range card {
 		fmt.Printf("key: %s, value: %v\n", k, v)
+		cardlist = append(cardlist, v)
 	}
+	res, err := json.Marshal(cardlist)
+	if err != nil {
+		fmt.Println(fmt.Errorf("json.Marshal: %s", err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
 }
 
 func main() {
