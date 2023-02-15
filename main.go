@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 type Pong struct {
@@ -47,7 +49,7 @@ func pinghandle(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func draw(w http.ResponseWriter, r *http.Request) {
+func drawall(w http.ResponseWriter, r *http.Request) {
 	var cardlist []Item
 	for k, v := range card {
 		fmt.Printf("key: %s, value: %v\n", k, v)
@@ -55,7 +57,33 @@ func draw(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := json.Marshal(cardlist)
 	if err != nil {
-		fmt.Println(fmt.Errorf("json.Marshal: %s", err))
+		fmt.Println(fmt.Errorf("drawall-json.Marshal: %s", err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
+func draw(w http.ResponseWriter, r *http.Request) {
+	var cardlist []Item
+	for k, v := range card {
+		fmt.Printf("key: %s, value: %v\n", k, v)
+		cardlist = append(cardlist, v)
+	}
+	rand.Seed(time.Now().UnixNano())
+	ran := rand.Intn(100)
+	var ca Item
+	switch {
+	case ran <= 80:
+		ca = cardlist[0]
+	case ran <= 95:
+		ca = cardlist[1]
+	case ran <= 100:
+		ca = cardlist[2]
+	}
+	res, err := json.Marshal(ca)
+	if err != nil {
+		fmt.Println(fmt.Errorf("draw-json.Marshal: %s", err))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -64,6 +92,7 @@ func draw(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", pinghandle)
+	http.HandleFunc("/drawall", drawall)
 	http.HandleFunc("/draw", draw)
 
 	fmt.Println("server start!")
