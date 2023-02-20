@@ -31,9 +31,11 @@ type Item struct {
 }
 
 var card map[string]Item = map[string]Item{
-	"ki":   {Name: "木の剣", Rarity: RarityN},
-	"isi":  {Name: "石の剣", Rarity: RarityR},
-	"tetu": {Name: "鉄の剣", Rarity: RaritySR},
+	"ki":    {Name: "木の剣", Rarity: RarityN},
+	"isi":   {Name: "石の剣", Rarity: RarityR},
+	"tetu":  {Name: "鉄の剣", Rarity: RaritySR},
+	"kin":   {Name: "金の剣", Rarity: RaritySSR},
+	"daiya": {Name: "ダイヤモンドの剣", Rarity: RarityUR},
 }
 
 func pinghandle(w http.ResponseWriter, r *http.Request) {
@@ -65,21 +67,19 @@ func drawall(w http.ResponseWriter, r *http.Request) {
 }
 
 func draw(w http.ResponseWriter, r *http.Request) {
-	var cardlist []Item
-	for k, v := range card {
-		fmt.Printf("key: %s, value: %v\n", k, v)
-		cardlist = append(cardlist, v)
-	}
-	rand.Seed(time.Now().UnixNano())
 	ran := rand.Intn(100)
 	var ca Item
 	switch {
-	case ran <= 80:
-		ca = cardlist[0]
-	case ran <= 95:
-		ca = cardlist[1]
+	case ran <= 70:
+		ca = card["ki"]
+	case ran <= 84:
+		ca = card["isi"]
+	case ran <= 94:
+		ca = card["tetu"]
+	case ran <= 99:
+		ca = card["kin"]
 	case ran <= 100:
-		ca = cardlist[2]
+		ca = card["daiya"]
 	}
 	res, err := json.Marshal(ca)
 	if err != nil {
@@ -96,6 +96,7 @@ func main() {
 	http.HandleFunc("/draw", draw)
 
 	fmt.Println("server start!")
+	rand.Seed(time.Now().UnixNano())
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
