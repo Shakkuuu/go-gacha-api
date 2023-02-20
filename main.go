@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -90,10 +91,50 @@ func draw(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func manydraw(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("many")
+	intquery, err := strconv.Atoi(query)
+	if err != nil {
+		fmt.Println(err)
+		errpong := Pong{http.StatusBadRequest, "no"}
+		errresp, err := json.Marshal(errpong)
+		if err != nil {
+			fmt.Println(fmt.Errorf("json.Marshal: %s", err))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(errresp)
+	}
+	var cardlist []Item
+	for i := 0; i < intquery; i++ {
+		ran := rand.Intn(100)
+		switch {
+		case ran <= 70:
+			cardlist = append(cardlist, card["ki"])
+		case ran <= 84:
+			cardlist = append(cardlist, card["isi"])
+		case ran <= 94:
+			cardlist = append(cardlist, card["tetu"])
+		case ran <= 99:
+			cardlist = append(cardlist, card["kin"])
+		case ran <= 100:
+			cardlist = append(cardlist, card["daiya"])
+		}
+	}
+	res, err := json.Marshal(cardlist)
+	if err != nil {
+		fmt.Println(fmt.Errorf("draw-json.Marshal: %s", err))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+}
+
 func main() {
 	http.HandleFunc("/", pinghandle)
 	http.HandleFunc("/drawall", drawall)
 	http.HandleFunc("/draw", draw)
+	http.HandleFunc("/manydraw", manydraw)
 
 	fmt.Println("server start!")
 	rand.Seed(time.Now().UnixNano())
